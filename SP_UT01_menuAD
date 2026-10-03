@@ -50,12 +50,12 @@ do {
 
             # Crear usuario y uso splatting porque me he informado y es una buena practica para evitar errores
            $userparam = @{
-                Name                  = $nombre
-                SamAccountName        = $login
-                UserPrincipalName     = "$login@$dominioname"
-                Path                  = "OU=$ouuser,$dominiodn"
-                AccountPassword       = $clave
-                Enabled               = $true
+                Name = $nombre
+                SamAccountName = $login
+                UserPrincipalName = "$login@$dominioname"
+                Path = "OU=$ouuser,$dominiodn"
+                AccountPassword = $clave
+                Enabled = $true
                 ChangePasswordAtLogon = $true
             }
             New-ADUser @userparam
