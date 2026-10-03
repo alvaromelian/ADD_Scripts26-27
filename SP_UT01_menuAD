@@ -48,14 +48,17 @@ do {
             $dominiodn = (Get-ADDomain).DistinguishedName
             $dominioname = (Get-ADDomain).DNSRoot
 
-            # Crear usuario indicando los parametros minimos obligatorios de la practica
-            New-ADUser -Name $nombre `
-                       -SamAccountName $login `
-                       -UserPrincipalName "$login@$dominioname" `
-                       -Path "OU=$ouuser,$dominiodn" `
-                       -AccountPassword $clave `
-                       -Enabled $true `
-                       -ChangePasswordAtLogon $true
+            # Crear usuario y uso splatting porque me he informado y es una buena practica para evitar errores
+           $userparam = @{
+                Name                  = $nombre
+                SamAccountName        = $login
+                UserPrincipalName     = "$login@$dominioname"
+                Path                  = "OU=$ouuser,$dominiodn"
+                AccountPassword       = $clave
+                Enabled               = $true
+                ChangePasswordAtLogon = $true
+            }
+            New-ADUser @userparam
 
             # Añadir el usuario al grupo
             Add-ADGroupMember -Identity $grupouser -Members $login
