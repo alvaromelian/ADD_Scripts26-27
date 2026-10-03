@@ -58,7 +58,7 @@ do {
                        -ChangePasswordAtLogon $true
 
             # Añadir el usuario al grupo
-            Add-ADGroupMember -Identity $grupouser -Members$login
+            Add-ADGroupMember -Identity $grupouser -Members $login
             Write-Host "Usuario creado y añadido al grupo"
         }
         "5" {
