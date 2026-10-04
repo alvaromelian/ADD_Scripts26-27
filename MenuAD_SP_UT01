@@ -1,0 +1,74 @@
+# Cargar el modulo de Active Directory
+Import-Module ActiveDirectory
+
+do {
+    # 1. Mostrar las opciones por pantalla
+    Write-Host "MENU ACTIVE DIRECTORY"
+    Write-Host "1. Informacion del dominio"
+    Write-Host "2. Crear OU"
+    Write-Host "3. Crear grupo"
+    Write-Host "4. Crear usuario"
+    Write-Host "5. Salir"
+
+    # 2. Leer la opcion elegida por el usuario
+    $opcion = Read-Host "Elige una opcion (1-5)"
+
+    # 3. Segun la opcion ejecutar el comando correspondiente
+    switch ($opcion) {
+        "1" {
+            # Muestra datos del equipo, dominio y recuentos de objetos
+            Write-Host "Equipo: $env:COMPUTERNAME"
+            Write-Host "Dominio: $((Get-ADDomain).DNSRoot)"
+            Write-Host "Numero de OUs: $((Get-ADOrganizationalUnit -Filter *).Count)"
+            Write-Host "Numero de Grupos: $((Get-ADGroup -Filter *).Count)"
+            Write-Host "Numero de Usuarios: $((Get-ADUser -Filter *).Count)"
+        }
+        "2" {
+            # Crear una Unidad Organizativa
+            $ou = Read-Host "Nombre de la nueva OU"
+            New-ADOrganizationalUnit -Name $ou
+            Write-Host "OU creada correctamente"
+        }
+        "3" {
+            # Crear un grupo de seguridad
+            $grupo = Read-Host "Nombre del nuevo grupo"
+            $oudestino = Read-Host "OU donde se creara el grupo"
+            $dominio = (Get-ADDomain).DistinguishedName
+            
+            New-ADGroup -Name $grupo -GroupScope Global -Path "OU=$oudestino,$dominio"
+            Write-Host "Grupo creado correctamente"
+        }
+        "4" {
+            # Crear un usuario y meterlo en un grupo
+            $nombre = Read-Host "Nombre completo"
+            $login = Read-Host "Nombre de usuario (login)"
+            $ouuser = Read-Host "OU del usuario"
+            $grupouser = Read-Host "Grupo al que se añadira"
+            $clave = Read-Host "Contraseña inicial" -AsSecureString
+            $dominiodn = (Get-ADDomain).DistinguishedName
+            $dominioname = (Get-ADDomain).DNSRoot
+
+            # Crear usuario con splatting
+           $userparam = @{
+                Name = $nombre
+                SamAccountName = $login
+                UserPrincipalName = "$login@$dominioname"
+                Path = "OU=$ouuser,$dominiodn"
+                AccountPassword = $clave
+                Enabled = $true
+                ChangePasswordAtLogon = $true
+            }
+            New-ADUser @userparam
+
+            # Añadir el usuario al grupo
+            Add-ADGroupMember -Identity $grupouser -Members $login
+            Write-Host "Usuario creado y añadido al grupo"
+        }
+        "5" {
+            Write-Host "Saliendo del programa..."
+        }
+        default {
+            Write-Host "Opcion invalida"
+        }
+    }
+} while ($opcion -ne "5")
