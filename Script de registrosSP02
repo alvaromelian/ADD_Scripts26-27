@@ -1,0 +1,38 @@
+#!/bin/bash
+
+SEVERIDAD=$1
+
+#Introducir un parámetro
+if [ -z "$SEVERIDAD" ]; then
+    echo "Error: Debes indicar un nivel de severidad."
+    exit 1
+fi
+
+#Traducir español al nombre interno de journalctl
+case "$SEVERIDAD" in
+    emergente)   NIVEL="emerg" ;;
+    alerta)      NIVEL="alert" ;;
+    critico)     NIVEL="crit" ;;
+    error)       NIVEL="err" ;;
+    advertencia) NIVEL="warning" ;;
+    noticia)     NIVEL="notice" ;;
+    informacion) NIVEL="info" ;;
+    depuracion)  NIVEL="debug" ;;
+    *)
+        echo "Error: Parámetro no válido."
+        exit 1
+        ;;
+esac
+
+#Guardamos la ruta del archivo final en carpeta personal
+ARCHIVO="$HOME/logs_${SEVERIDAD}.txt"
+
+#Extraemos los registros desde el día 1 de este mes
+journalctl -p "$NIVEL" --since "$(date +%Y-%m-01)" > "$ARCHIVO"
+
+#Contamos el número de líneas/registros
+CANTIDAD=$(wc -l < "$ARCHIVO")
+
+#Muestra mensaje final por pantalla
+echo "Se han encontrado $CANTIDAD registros de nivel '$SEVERIDAD' este mes."
+echo "Guardados en: $ARCHIVO"
